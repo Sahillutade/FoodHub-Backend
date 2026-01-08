@@ -21,7 +21,7 @@ public class BrevoEmailService {
 		try {
 			String payload = """
 					{
-							"sender": { "name": "FoodHub", "email": "no-reply@foodhub.com" },
+							"sender": { "name": "FoodHub", "email": "lutadesahil@gmail.com" },
 							"to": [{ "email": "%s" }],
 							"subject": "%s",
 							"textContent": "%s"
