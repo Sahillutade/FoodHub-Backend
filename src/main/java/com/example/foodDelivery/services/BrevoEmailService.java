@@ -24,7 +24,7 @@ public class BrevoEmailService {
 							"sender": { "name": "FoodHub", "email": "lutadesahil@gmail.com" },
 							"to": [{ "email": "%s" }],
 							"subject": "%s",
-							"textContent": "%s"
+							"htmlContent": "%s"
 					}
 			""".formatted(to, subject, textContent);
 			
@@ -36,6 +36,9 @@ public class BrevoEmailService {
 			.build();
 			
 			HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+			
+			System.out.println("Brevo Status: " + response.statusCode());
+            System.out.println("Brevo Response: " + response.body());
 		}
 		catch(Exception e) {
 			throw new RuntimeException("Failed to send email via Brevo", e);
