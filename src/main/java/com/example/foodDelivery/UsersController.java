@@ -100,18 +100,17 @@ public class UsersController {
 		
 		String otp = generateOtp();
 		
-		otpMap.put(email, otp);
-		otpExpiryMap.put(email, LocalDateTime.now().plusMinutes(5));
-		
-		String mailText = "Your OTP is: " + otp + "\nValid for 5 minutes.";
-		
-		brevoEmailService.sendEmail(email, "OTP Verification From FoodHub", mailText);
-		
-		Map<String, Object> response = new HashMap<>();
-		response.put("otp", otp);
-		response.put("message", "OTP sent successfully");
-		
-		return response;
+		try {
+	        brevoEmailService.sendEmail(email, "OTP Verification - FoodHub", otp);
+
+	        otpMap.put(email, otp);
+	        otpExpiryMap.put(email, LocalDateTime.now().plusMinutes(5));
+
+	        return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500)
+	                             .body(Map.of("error", "Failed to send OTP email", "details", e.getMessage()));
+	    }
 		
 	}
 	

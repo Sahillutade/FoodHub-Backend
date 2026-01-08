@@ -39,6 +39,10 @@ public class BrevoEmailService {
 			
 			System.out.println("Brevo Status: " + response.statusCode());
             System.out.println("Brevo Response: " + response.body());
+            
+            if(!response.body().contains("messageId")) {
+            	throw new RuntimeException("Brevo did not return messageId: " + response.body());
+            }
 		}
 		catch(Exception e) {
 			e.printStackTrace();
