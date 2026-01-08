@@ -27,6 +27,7 @@ public class OrderController {
 	@Autowired
 	private UsersRepository userRepo;
 	
+	@Autowired
 	private BrevoEmailService brevoEmailService;
 	
 	@Transactional

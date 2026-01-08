@@ -25,6 +25,7 @@ public class UsersController {
 	@Autowired
 	private UsersRepository userRepository;
 	
+	@Autowired
 	private BrevoEmailService brevoEmailService;
 	
 	private final Map<String, String> otpMap = new ConcurrentHashMap<>();
