@@ -21,10 +21,10 @@ public class BrevoEmailService {
 		try {
 			String payload = """
 					{
-							"sender": { "name": "FoodHub", "email": "lutadesahil@gmail.com" },
+							"sender": { "name": "FoodHub", "email": "no-reply@foodhub.com" },
 							"to": [{ "email": "%s" }],
 							"subject": "%s",
-							"htmlContent": "%s"
+							"textContent": "%s"
 					}
 			""".formatted(to, subject, textContent);
 			
@@ -35,17 +35,9 @@ public class BrevoEmailService {
 			.POST(HttpRequest.BodyPublishers.ofString(payload))
 			.build();
 			
-			HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-			
-			System.out.println("Brevo Status: " + response.statusCode());
-            System.out.println("Brevo Response: " + response.body());
-            
-            if(!response.body().contains("messageId")) {
-            	throw new RuntimeException("Brevo did not return messageId: " + response.body());
-            }
+			HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 		}
 		catch(Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException("Failed to send email via Brevo", e);
 		}
 		
