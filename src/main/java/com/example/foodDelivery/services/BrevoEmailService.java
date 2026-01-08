@@ -35,12 +35,13 @@ public class BrevoEmailService {
 			.POST(HttpRequest.BodyPublishers.ofString(payload))
 			.build();
 			
-			HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+			HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 			
 			System.out.println("Brevo Status: " + response.statusCode());
             System.out.println("Brevo Response: " + response.body());
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Failed to send email via Brevo", e);
 		}
 		
