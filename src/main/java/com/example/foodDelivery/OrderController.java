@@ -1,14 +1,11 @@
 package com.example.foodDelivery;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.foodDelivery.model.Order;
@@ -16,9 +13,8 @@ import com.example.foodDelivery.model.OrderItem;
 import com.example.foodDelivery.model.Users;
 import com.example.foodDelivery.repository.OrderRepository;
 import com.example.foodDelivery.repository.UsersRepository;
+import com.example.foodDelivery.services.BrevoEmailService;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 
 @RestController
@@ -31,8 +27,7 @@ public class OrderController {
 	@Autowired
 	private UsersRepository userRepo;
 	
-	@Autowired
-	private JavaMailSender mailSender;
+	private BrevoEmailService brevoEmailService;
 	
 	@Transactional
 	@PostMapping("/confirm-payment")
@@ -97,47 +92,38 @@ public class OrderController {
 			throw new IllegalStateException("User email not available");
 		}
 		
-		try {
-			
-			MimeMessage mimeMessage = mailSender.createMimeMessage();
-			MimeMessageHelper message = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-			message.setFrom("lutadesahil@gmail.com", "FoodHub");
-			message.setTo(user.getEmail());
-			message.setSubject("Order Confirmed | Order #" + order.getId());
-			
-			StringBuilder mailBody = new StringBuilder();
-			
-			mailBody.append("Hi ").append(user.getName() != null ? user.getName() : "Customer").append(", \n\n");
-			mailBody.append("Your order has been successfully placed.\n\n");
-			mailBody.append("Order ID: ").append(order.getId()).append("\n");
-			mailBody.append("Restaurant ID: ").append(order.getRestaurant().getId()).append("\n\n");
-			mailBody.append("Order Items:\n");
-			
-			double total = 0;
-		    for (OrderItem item : order.getOrderItems()) {
-		        double itemTotal = item.getPrice() * item.getQuantity();
-		        total += itemTotal;
+		StringBuilder mailBody = new StringBuilder();
+		
+		mailBody.append("Hi ")
+		.append(user.getName() != null ? user.getName() : "Customer")
+		.append(",\n\n")
+		.append("Your order has been successfully placed.\n\n")
+		.append("Order ID: ").append(order.getId()).append("\n")
+		.append("Restaurant ID: ").append(order.getRestaurant().getId()).append("\n\n")
+        .append("Order Items:\n");
+		
+		double total = 0;
+	    for (OrderItem item : order.getOrderItems()) {
+	        double itemTotal = item.getPrice() * item.getQuantity();
+	        total += itemTotal;
 
-		        mailBody.append("- ")
-		                .append(item.getItemName())
-		                .append(" x ")
-		                .append(item.getQuantity())
-		                .append(" = ₹")
-		                .append(itemTotal)
-		                .append("\n");
-		    }
+	        mailBody.append("- ")
+	                .append(item.getItemName())
+	                .append(" x ")
+	                .append(item.getQuantity())
+	                .append(" = ₹")
+	                .append(itemTotal)
+	                .append("\n");
+	    }
 
-		    mailBody.append("\nTotal Amount: ₹").append(total);
-		    mailBody.append("\n\nThank you for ordering with us!");
+	    mailBody.append("\nTotal Amount: ₹").append(total);
+	    mailBody.append("\n\nThank you for ordering with FoodHub!");
 
-		    message.setText(mailBody.toString());
-
-		    mailSender.send(mimeMessage);
-			
-		}
-		catch(MessagingException | UnsupportedEncodingException e) {
-			throw new RuntimeException("failed to send email", e);
-		}
+	    brevoEmailService.sendEmail(
+	            user.getEmail(),
+	            "Order Confirmed | Order #" + order.getId(),
+	            mailBody.toString()
+	    );
 		
 	}
 	

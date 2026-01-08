@@ -10,14 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.foodDelivery.dto.LoginRequest;
 import com.example.foodDelivery.dto.RegisterRequest;
 import com.example.foodDelivery.model.Users;
 import com.example.foodDelivery.repository.UsersRepository;
+import com.example.foodDelivery.services.BrevoEmailService;
 
 @RestController
 @RequestMapping("/user")
@@ -26,8 +25,7 @@ public class UsersController {
 	@Autowired
 	private UsersRepository userRepository;
 	
-	@Autowired
-	private JavaMailSender mailSender;
+	private BrevoEmailService brevoEmailService;
 	
 	private final Map<String, String> otpMap = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> otpExpiryMap = new ConcurrentHashMap<>();
@@ -104,12 +102,9 @@ public class UsersController {
 		otpMap.put(email, otp);
 		otpExpiryMap.put(email, LocalDateTime.now().plusMinutes(5));
 		
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setTo(email);
-		message.setSubject("OTP Verification From FoodHub");
-		message.setText("Your OTP is: " + otp + "\nValid for 5 minutes.");
+		String mailText = "Your OTP is: " + otp + "\nValid for 5 minutes.";
 		
-		mailSender.send(message);
+		brevoEmailService.sendEmail(email, "OTP Verification From FoodHub", mailText);
 		
 		Map<String, Object> response = new HashMap<>();
 		response.put("otp", otp);
